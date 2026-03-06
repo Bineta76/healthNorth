@@ -15,7 +15,7 @@ session_set_cookie_params([
 session_start();
 
 /******************** INCLUDE HEADER ********************/
-include 'includes/header.php';
+/*include 'includes/header.php'
 
 /******************** CONNEXION BDD ********************/
 try {

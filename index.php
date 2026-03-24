@@ -15,22 +15,21 @@ session_set_cookie_params([
 session_start();
 
 /******************** INCLUDE HEADER ********************/
-/*include 'includes/header.php'
+include 'includes/header.php';
 
 /******************** CONNEXION BDD ********************/
-try {
-    $pdo = new PDO(
-        'mysql:host=localhost;dbname=labo;charset=utf8mb4',
-        'root',
-        '',
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        ]
-    );
-} catch (PDOException $e) {
-    die("Erreur de connexion : " . htmlspecialchars($e->getMessage()));
-}
+
+$pdo = new PDO(
+    "mysql:host=localhost;dbname=labo;charset=utf8",
+    "root",
+    "",
+    [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,        // activer les erreurs
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,  // tableau associatif
+        PDO::ATTR_EMULATE_PREPARES => false                // sécurité SQL
+    ]
+);
+
 
 /******************** DÉCONNEXION ********************/
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {

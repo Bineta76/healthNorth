@@ -1,8 +1,8 @@
 <?php
-$host = "mysql-heathnorth.alwaysdata.net"; 
-$user = "heathnorth";
-$password = "Loute76";
-$dbname = "heathnorth_labo";
+$host = "mysql-loute.alwaysdata.net"; 
+$user = "loute";
+$password = "rootlaboG2";
+$dbname = "loute_labo";
 $port = 3306;
 
 try {

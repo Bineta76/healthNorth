@@ -1,22 +1,46 @@
 <?php
+//session_start();
+// include 'includes/header.php';
 
-session_start();
-include 'includes/header.php';
+// Paramètres de connexion AlwaysData
+$host = "mysql-loute.alwaysdata.net"; 
+$user = "loute";
+$password = "rootlaboG2";
+$dbname = "loute_labo";
+$port = 3306;           
 
-
-// Connexion à la base de données
+// Connexion PDO sécurisée
 try {
-    $pdo = new PDO("mysql:host=mysql-heathnorth.alwaysdata.net;dbname=heathnorth_labo;charset=utf8mb4", "heathnorth_laboratoire", "laboratoire");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO(
+        "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4",
+        $user,
+        $password,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+    // Test de connexion (optionnel)
+    // echo "Connexion réussie !";
 } catch (PDOException $e) {
-    die("❌ Erreur de connexion : " . $e->getMessage());
+    die("❌ Impossible de se connecter à la base de données : " . htmlspecialchars($e->getMessage()));
+}
+
+// Gestion des messages flash
+function flash($message, $type = 'info') {
+    $_SESSION['flash'] = ['message' => $message, 'type' => $type];
 }
 
 // Suppression d’un compte rendu
 if (isset($_GET['supprimer'])) {
     $id = intval($_GET['supprimer']);
     $stmt = $pdo->prepare("DELETE FROM bilan WHERE id = ?");
-    $stmt->execute([$id]);
+    if ($stmt->execute([$id])) {
+        flash("✅ Compte rendu supprimé avec succès.", "success");
+    } else {
+        flash("❌ Impossible de supprimer le compte rendu.", "danger");
+    }
     header("Location: bilan.php");
     exit;
 }
@@ -28,22 +52,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['contenu'])) {
         try {
             $stmt = $pdo->prepare("INSERT INTO bilan (contenu) VALUES (?)");
             $stmt->execute([$contenu]);
+            flash("✅ Compte rendu ajouté avec succès.", "success");
             header("Location: bilan.php");
             exit;
         } catch (PDOException $e) {
-            echo "<div class='alert alert-danger'>❌ Erreur PDO : " . htmlspecialchars($e->getMessage()) . "</div>";
+            flash("❌ Erreur PDO : " . htmlspecialchars($e->getMessage()), "danger");
         }
     } else {
-        echo "<div class='alert alert-warning'>⚠️ Le contenu est vide.</div>";
+        flash("⚠️ Le contenu est vide.", "warning");
     }
 }
 
 // Récupération des comptes rendus
 try {
     $stmt = $pdo->query("SELECT id, contenu, date_creation FROM bilan ORDER BY id DESC");
-    $bilanListe = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $bilanListe = $stmt->fetchAll();
 } catch (PDOException $e) {
-    die("❌ Erreur PDO : " . $e->getMessage());
+    die("❌ Erreur PDO : " . htmlspecialchars($e->getMessage()));
 }
 ?>
 <!DOCTYPE html>
@@ -56,6 +81,14 @@ try {
 <body class="bg-light">
 <div class="container mt-5">
     <h1 class="mb-4">🩺 Gestion des comptes rendus</h1>
+
+    <!-- Message flash -->
+    <?php if (!empty($_SESSION['flash'])): ?>
+        <div class="alert alert-<?= $_SESSION['flash']['type'] ?>">
+            <?= $_SESSION['flash']['message'] ?>
+        </div>
+        <?php unset($_SESSION['flash']); ?>
+    <?php endif; ?>
 
     <!-- Formulaire d'ajout -->
     <div class="card mb-4">
@@ -77,9 +110,12 @@ try {
                 <div class="card-body">
                     <h5 class="card-title">📝 Compte rendu #<?= htmlspecialchars($row['id']) ?></h5>
                     <p class="card-text"><?= nl2br(htmlspecialchars($row['contenu'])) ?></p>
-                    <small class="text-muted">Créé le : <?= $row['date_creation'] ?></small><br><br>
-                    <a href="?supprimer=<?= urlencode($row['id']) ?>" 
-                       class="btn btn-danger" 
+                    <small class="text-muted">
+                        Créé le : <?= date('d/m/Y H:i', strtotime($row['date_creation'])) ?>
+                    </small>
+                    <br><br>
+                    <a href="?supprimer=<?= urlencode($row['id']) ?>"
+                       class="btn btn-danger"
                        onclick="return confirm('Supprimer ce compte rendu ?');">
                        Supprimer
                     </a>

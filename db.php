@@ -1,8 +1,10 @@
 <?php
-$host = "localhost";
-$user = "root";
-$password = "";
-$dbname = "labo";
+$host = "mysql-loute.alwaysdata.net"; 
+$user = "loute";
+$password = "rootlabo";
+$dbname = "loute_labo";
+$port = 3306;
+
 
 try {
     $pdo = new PDO(
@@ -19,3 +21,12 @@ try {
     die("Erreur de connexion PDO : " . $e->getMessage());
 }
 ?>
+
+
+
+
+
+//$host = "localhost";
+//$user = "root";
+//$password = "";
+//$dbname = "labo";

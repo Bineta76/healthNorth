@@ -18,11 +18,18 @@ session_start();
 /*include 'includes/header.php';
 
 /******************** CONNEXION BDD ********************/
+//$pdo = new PDO(
+        //'mysql:host=localhost;dbname=labo;charset=utf8mb4',
+        //'root',
+    
+
+
+
 try {
     $pdo = new PDO(
-        'mysql:host=localhost;dbname=labo;charset=utf8mb4',
-        'root',
-        '',
+        'mysql:host=mysql-loute.alwaysdata.net;dbname=loute_labo;charset=utf8mb4',
+        'loute',
+        'rootgary',
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Active les exceptions
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Résultats en tableau associatif

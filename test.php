@@ -1,3 +1,1 @@
-<?php
-echo "Test OK";
-?>
+http://localhost/test.php

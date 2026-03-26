@@ -1,6 +1,6 @@
 <?php
 
-/******************** AFFICHAGE ERREURS (DEV) ********************/
+/******************** CONFIG DEV ********************/
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -8,37 +8,39 @@ error_reporting(E_ALL);
 /******************** SESSION SÉCURISÉE ********************/
 session_set_cookie_params([
     'httponly' => true,
-    'secure' => false, // ⚠️ mettre TRUE uniquement si HTTPS
+    'secure' => false, // mettre true en HTTPS
     'samesite' => 'Strict'
 ]);
 
 session_start();
 
-/******************** INCLUDE HEADER ********************/
-/*include 'includes/header.php';
+/******************** PROTECTION SESSION ********************/
+if (!isset($_SESSION['created'])) {
+    $_SESSION['created'] = time();
+} elseif (time() - $_SESSION['created'] > 1800) {
+    session_regenerate_id(true);
+    $_SESSION['created'] = time();
+}
+
+/******************** CSRF TOKEN ********************/
+if (empty($_SESSION['token'])) {
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+}
 
 /******************** CONNEXION BDD ********************/
-//$pdo = new PDO(
-        //'mysql:host=localhost;dbname=labo;charset=utf8mb4',
-        //'root',
-    
-
-
-
 try {
     $pdo = new PDO(
         'mysql:host=mysql-loute.alwaysdata.net;dbname=loute_labo;charset=utf8mb4',
         'loute',
-        'rootgary',
+        'laboratoire',
         [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Active les exceptions
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Résultats en tableau associatif
-            PDO::ATTR_EMULATE_PREPARES => false // Sécurité : vraies requêtes préparées
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false
         ]
     );
 } catch (PDOException $e) {
-    // En production, évite d'afficher les détails
-    die("Erreur de connexion à la base de données.");
+    die("Erreur : " . $e->getMessage());
 }
 
 /******************** DÉCONNEXION ********************/
@@ -61,16 +63,27 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit;
 }
 
-/******************** MODE (connexion / inscription) ********************/
-$mode = ($_GET['action'] ?? '') === 'inscription' ? 'inscription' : 'connexion';
+/******************** MODE ********************/
+$mode = 'connexion';
+if (isset($_GET['action']) && $_GET['action'] === 'inscription') {
+    $mode = 'inscription';
+}
+
 $message = '';
 $messageType = '';
 
-/******************** TRAITEMENT FORMULAIRE ********************/
+/******************** TRAITEMENT ********************/
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
+    // Vérification CSRF
+    if (!isset($_POST['token']) || !hash_equals($_SESSION['token'], $_POST['token'])) {
+        die("Erreur CSRF");
+    }
+
+    $action = $_POST['action'] ?? '';
+
     /* ===== INSCRIPTION ===== */
-    if ($mode === 'inscription' && isset($_POST['inscription'])) {
+    if ($mode === 'inscription' && $action === 'inscription') {
 
         $nom   = trim($_POST['nom'] ?? '');
         $email = strtolower(trim($_POST['email'] ?? ''));
@@ -79,20 +92,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($nom === '' || $email === '' || $mdp === '') {
             $message = "Tous les champs sont obligatoires.";
             $messageType = "danger";
+
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $message = "Email invalide.";
             $messageType = "danger";
-        } elseif (strlen($mdp) < 8) {
-            $message = "Le mot de passe doit contenir au moins 8 caractères.";
-            $messageType = "danger";
-        } else {
-            $stmt = $pdo->prepare("SELECT id FROM patient WHERE email = ?");
-            $stmt->execute([$email]);
 
-            if ($stmt->fetch()) {
-                $message = "Cet email est déjà enregistré.";
-                $messageType = "danger";
-            } else {
+        } elseif (!preg_match('/^(?=.*[A-Z])(?=.*[0-9]).{8,}$/', $mdp)) {
+            $message = "Mot de passe faible (8 caractères, 1 majuscule, 1 chiffre).";
+            $messageType = "danger";
+
+        } else {
+
+            try {
                 $hash = password_hash($mdp, PASSWORD_DEFAULT);
 
                 $stmt = $pdo->prepare(
@@ -101,15 +112,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $stmt->execute([$nom, $email, $hash]);
 
-                $message = "Inscription réussie. Vous pouvez vous connecter.";
-                $messageType = "success";
-                $mode = 'connexion';
+                session_regenerate_id(true);
+                $_SESSION['id_patient'] = $pdo->lastInsertId();
+                $_SESSION['utilisateur'] = $nom;
+
+                header("Location: index.php");
+                exit;
+
+            } catch (PDOException $e) {
+                $message = "Cet email existe déjà.";
+                $messageType = "danger";
             }
         }
     }
 
     /* ===== CONNEXION ===== */
-    elseif ($mode === 'connexion' && isset($_POST['connexion'])) {
+    if ($mode === 'connexion' && $action === 'connexion') {
 
         $email = strtolower(trim($_POST['email'] ?? ''));
         $mdp   = $_POST['mot_de_passe'] ?? '';
@@ -117,7 +135,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($email === '' || $mdp === '') {
             $message = "Tous les champs sont obligatoires.";
             $messageType = "danger";
+
         } else {
+
             $stmt = $pdo->prepare(
                 "SELECT id, nom, mot_de_passe
                  FROM patient
@@ -127,12 +147,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($mdp, $user['mot_de_passe'])) {
+
                 session_regenerate_id(true);
                 $_SESSION['id_patient'] = $user['id'];
                 $_SESSION['utilisateur'] = $user['nom'];
 
                 header("Location: index.php");
                 exit;
+
             } else {
                 $message = "Email ou mot de passe incorrect.";
                 $messageType = "danger";
@@ -146,9 +168,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Health North</title>
+    <title>Health North - Connexion</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
 <div class="container py-5">
@@ -179,10 +202,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="post">
 
+                <input type="hidden" name="token" value="<?= $_SESSION['token'] ?>">
+
                 <?php if ($mode === 'inscription'): ?>
                     <div class="mb-3">
                         <label class="form-label">Nom</label>
-                        <input type="text" name="nom" class="form-control" required>
+                        <input type="text" name="nom"
+                               value="<?= htmlspecialchars($_POST['nom'] ?? '') ?>"
+                               class="form-control" required>
                     </div>
                 <?php endif; ?>
 
@@ -199,7 +226,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button type="submit"
-                        name="<?= $mode ?>"
+                        name="action"
+                        value="<?= $mode ?>"
                         class="btn btn-primary w-100">
                     <?= $mode === 'connexion' ? 'Se connecter' : "S'inscrire" ?>
                 </button>

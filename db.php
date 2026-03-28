@@ -1,32 +1,22 @@
 <?php
 $host = "mysql-loute.alwaysdata.net"; 
 $user = "loute";
-$password = "laboratoire";
+$password = "loute210982";
 $dbname = "loute_labo";
 $port = 3306;
 
-
 try {
     $pdo = new PDO(
-        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8",
         $user,
         $password,
         [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
         ]
     );
-    // echo "Connexion PDO réussie !";
+    echo "✅ Connexion PDO réussie";
 } catch (PDOException $e) {
-    die("Erreur de connexion PDO : " . $e->getMessage());
+    die("❌ Erreur PDO : " . $e->getMessage());
 }
-?>
-
-
-
-
-
-//$host = "localhost";
-//$user = "root";
-//$password = "";
-//$dbname = "labo";

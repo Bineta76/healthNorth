@@ -1,7 +1,0 @@
-{
-  "git.ignoreMissingGitWarning": true,
-  "liveServer.settings.donotVerifyTags": true,
-  "php.validate.enable": true,
-  "php.validate.executablePath": "C:/wamp64/bin/php/php8.3.28/php.exe",
-  "files.autoSave": "afterDelay"
-}

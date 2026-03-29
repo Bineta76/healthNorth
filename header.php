@@ -26,12 +26,33 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>" href="index.php">Accueil</a>
                     </li>
-                    <li class="nav-item">
+                   
+                   
+                    <li class ="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'inscription.php' ? 'active' : '' ?>" href="inscription.php">Inscription</a>
-                    </li>
-                    <li class="nav-item">
+                      </li>  
+                   
+                   
+                   
+                    <li class ="nav-item">
+                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'services.php' ? 'active' : '' ?>" href="services.php">Services</a>
+                      </li>  
+                    
+                  
+                    
+                    
+                    
+                    
+                    
+                    
+                      <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'quiSommesNous.php' ? 'active' : '' ?>" href="quiSommesNous.php">Qui sommes-nous ?</a>
                     </li>
+                    
+                    
+                    
+                    
+                    
                     <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'liste.php' ? 'active' : '' ?>" href="liste.php">Gestion des rendez-vous</a>
                     </li>

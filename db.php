@@ -1,6 +1,6 @@
 <?php
 $host = "mysql-loute.alwaysdata.net"; 
-$user = "loute";
+$user = "loute_labo";
 $password = "loute210982";
 $dbname = "loute_labo";
 $port = 3306;

@@ -23,6 +23,10 @@ if (session_status() === PHP_SESSION_NONE) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+
+
+
+
                     <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>" href="index.php">Accueil</a>
                     </li>
@@ -30,24 +34,11 @@ if (session_status() === PHP_SESSION_NONE) {
                    
                     <li class ="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'inscription.php' ? 'active' : '' ?>" href="inscription.php">Inscription</a>
-                      </li>  
-                   
-                   
-                   
-                    <li class ="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'services.php' ? 'active' : '' ?>" href="services.php">Services</a>
-                      </li>  
-                    
-                  
-                    
-                    
-                    
-                    
-                    
+                    </li>
                     
                       <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'quiSommesNous.php' ? 'active' : '' ?>" href="quiSommesNous.php">Qui sommes-nous ?</a>
-                    </li>
+                    
                     
                     
                     
@@ -82,3 +73,6 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </nav>
     <div class="container mt-4">
+    </div>
+</body>
+</html>

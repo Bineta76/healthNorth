@@ -53,8 +53,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'region.php' ? 'active' : '' ?>" href="region.php">Recherche de médecins</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'gestionResultat.php' ? 'active' : '' ?>" href="gestionResultat.php">Résultats des examens</a>
+                    
                     <li class="nav-item">
                         <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'facturation.php' ? 'active' : '' ?>" href="facturation.php">Facturation</a>
                     </li>

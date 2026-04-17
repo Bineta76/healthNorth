@@ -1,8 +1,8 @@
 <?php
-$host = "mysql-loute.alwaysdata.net"; 
-$user = "loute_labo";
-$password = "loute210982";
-$dbname = "loute_labo";
+$host = "localhost"; 
+$user = "root";
+$password = "";
+$dbname = "labo";
 $port = 3306;
 
 try {
@@ -20,3 +20,4 @@ try {
 } catch (PDOException $e) {
     die("❌ Erreur PDO : " . $e->getMessage());
 }
+?>
